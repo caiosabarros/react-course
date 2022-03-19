@@ -4,7 +4,9 @@ import React, {useEffect, useState} from 'react'
 import axios from 'axios'
 
 /*
-Data fetching with Axios in React
+Controlled Input Almost Working:
+It is not working because I need to type another caracther for the 
+function to be called.
 */
 
 const ETHERSCAN_KEY = "EFZNVDXNIMCDXUPYVT2IY9EXEXGCANDCX5"
@@ -14,6 +16,7 @@ function App() {
 
   const [balance, setBalance] = useState("");
   const [transactions, setTransactions] = useState([]);
+  const [address, setAddress] = useState("")
 
   async function getAddressBalance(_address){
     try {
@@ -25,24 +28,33 @@ function App() {
     }
   }
 
-  const getTransactionsList = async (_address, _quantity) => {
-    try {
-      const {data} = await axios.get(`https://api.etherscan.io/api?module=account&action=txlist&address=${_address}&startblock=0&endblock=99999999&page=1&offset=${_quantity}&sort=asc&apikey=${ETHERSCAN_KEY}`);
-      console.log(data);
-      //await Promise.all(data);
-      setTransactions(data.result);
-      console.log(transactions);
-    } catch(error){
-      console.log(error.message);
+ // const getTransactionsList = async (_address, _quantity) => {
+ //   try {
+ //     const {data} = await axios.get(`https://api.etherscan.io/api?module=account&action=txlist&address=${_address}&startblock=0&endblock=99999999&page=1&offset=${_quantity}&sort=asc&apikey=${ETHERSCAN_KEY}`);
+ //     console.log(data);
+ //     //await Promise.all(data);
+ //     setTransactions(data.result);
+ //     console.log(transactions);
+ //   } catch(error){
+ //     console.log(error.message);
+ //   }
+ // }
+
+  const handleChange = (e) =>{
+    setAddress(e.target.value);
+    if(address.length == 42){
+      getAddressBalance(address);
+      console.log(address);
     }
+    
   }
 
   useEffect(()=>{
-    getTransactionsList(UKRAINIAN_ADDRESS, 10)
-    getAddressBalance(UKRAINIAN_ADDRESS);
+    //getTransactionsList(UKRAINIAN_ADDRESS, 10)
+    //getAddressBalance(address);
     return ()=>{
     }
-  },[])
+  },[address])
 
   return (
     <div className="App">
@@ -52,6 +64,7 @@ function App() {
         >
           See Transactions
         </button>
+        <input value={address} onChange={handleChange} type="text"></input>
 
         <h1>Ukranian Balance on Ethereum Mainnet</h1>
         <h3>{(parseFloat(balance)/10**18).toFixed(3)} ETH</h3>
