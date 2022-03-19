@@ -1,38 +1,34 @@
 import logo from './logo.svg';
 import './App.css';
 import React, {useEffect, useState} from 'react'
+import axios from 'axios'
+
+/*
+Data fetching with Axios in React
+*/
+
+const ETHERSCAN_KEY = "EFZNVDXNIMCDXUPYVT2IY9EXEXGCANDCX5"
+const UKRAINIAN_ADDRESS = "0x165CD37b4C644C2921454429E7F9358d18A45e14"
 
 function App() {
 
-  const [counter, setCounter] = useState(0);
+  const [balance, setBalance] = useState("");
 
-  /* 
-  This is a functional simulation of a class component lifecycle.
-  */
-
-  /*
-  This useEffect below simulates a componentDidMount because of no-depedency.
-  It will run only once after the App() component is rendered.
-  */
-  useEffect(()=>{
-    setCounter(counter+1);
-    return ()=>{
-      setCounter(10);
+  async function getAddressBalance(_address){
+    try {
+      const {data} = await axios.get(`https://api.etherscan.io/api?module=account&action=balance&address=${_address}&tag=latest&apikey=${ETHERSCAN_KEY}`);
+      console.log(data);
+      setBalance(data.result);
+    } catch(error){
+      console.log(error.message);
     }
-  },[])
-
-  const handleClick = () => {
-    setCounter(counter+1);
   }
 
-  /*
-  This simulates a componentDidUpdate: there was an state update in the counter state.
-  So, this function will render, then also the App() component to load the new value of
-  counter on the screen.
-  */
   useEffect(()=>{
-    console.log("updated");
-  },[counter])
+    getAddressBalance(UKRAINIAN_ADDRESS);
+    return ()=>{
+    }
+  },[])
 
   return (
     <div className="App">
@@ -41,12 +37,12 @@ function App() {
         <p>
           Edit <code>src/App.js</code> and save to reload.
         </p>
-        <h1>{counter}</h1>
+        <h1>Ukranian Balance on Ethereum Mainnet</h1>
+        <h3>{(parseFloat(balance)/10**18).toFixed(3)} ETH</h3>
         {/*It is important to notice that when I click, I will call the function.
         Passsing handleClick() would mean that I would run the result of the function 
         when I click it. It the function returns a callback, then that may be 
         interesting.*/}
-        <h1 onClick={handleClick}>Increment</h1>
         <a
           className="App-link"
           href="https://reactjs.org"
