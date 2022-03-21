@@ -1,12 +1,12 @@
 import logo from './logo.svg';
 import './App.css';
-import React, {useEffect, useState} from 'react'
+import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import { DisplayEthSupply } from './components/DisplayEthSupply';
 
 /*
-Controlled Input Almost Working:
-It is not working because I need to type another caracther for the 
-function to be called.
+Organizing Code Into Separated Components: 
+Created the DisplayEthSupply Component.
 */
 
 const ETHERSCAN_KEY = "EFZNVDXNIMCDXUPYVT2IY9EXEXGCANDCX5"
@@ -17,44 +17,47 @@ function App() {
   const [balance, setBalance] = useState("");
   const [transactions, setTransactions] = useState([]);
   const [address, setAddress] = useState("")
+  const [supply, setSupply] = useState("")
 
-  async function getAddressBalance(_address){
+
+  async function getAddressBalance(_address) {
     try {
-      const {data} = await axios.get(`https://api.etherscan.io/api?module=account&action=balance&address=${_address}&tag=latest&apikey=${ETHERSCAN_KEY}`);
+      const { data } = await axios.get(`https://api.etherscan.io/api?module=account&action=balance&address=${_address}&tag=latest&apikey=${ETHERSCAN_KEY}`);
       console.log(data);
       setBalance(data.result);
-    } catch(error){
+    } catch (error) {
       console.log(error.message);
     }
   }
 
- // const getTransactionsList = async (_address, _quantity) => {
- //   try {
- //     const {data} = await axios.get(`https://api.etherscan.io/api?module=account&action=txlist&address=${_address}&startblock=0&endblock=99999999&page=1&offset=${_quantity}&sort=asc&apikey=${ETHERSCAN_KEY}`);
- //     console.log(data);
- //     //await Promise.all(data);
- //     setTransactions(data.result);
- //     console.log(transactions);
- //   } catch(error){
- //     console.log(error.message);
- //   }
- // }
-
-  const handleChange = (e) =>{
+  const handleChange = (e) => {
     setAddress(e.target.value);
-    if(address.length == 42){
+    if (address.length == 42) {
       getAddressBalance(address);
       console.log(address);
-    }
-    
+    } 
   }
 
-  useEffect(()=>{
-    //getTransactionsList(UKRAINIAN_ADDRESS, 10)
-    //getAddressBalance(address);
-    return ()=>{
+  const getTotalEthSupply = async () => {
+      const {data} = await axios.get(`https://api.etherscan.io/api?module=stats&action=ethsupply2&apikey=${ETHERSCAN_KEY}`)
+      console.log(data.result.EthSupply);
+      setSupply(data.result.EthSupply);
+      alert(`The total supply of ETH is: ${supply}`);
     }
-  },[address])
+  
+
+  const handleSubmit = (event) => {
+    console.log('handSubmit')
+    console.log(event)
+    getTotalEthSupply();
+    event.preventDefault();  
+    }
+  
+    useEffect(() => {
+    getAddressBalance(address);
+    return () => {
+    }
+  }, [address])
 
   return (
     <div className="App">
@@ -67,7 +70,7 @@ function App() {
         <input value={address} onChange={handleChange} type="text"></input>
 
         <h1>Ukranian Balance on Ethereum Mainnet</h1>
-        <h3>{(parseFloat(balance)/10**18).toFixed(3)} ETH</h3>
+        <h3>{(parseFloat(balance) / 10 ** 18).toFixed(3)} ETH</h3>
         {/*It is important to notice that when I click, I will call the function.
         Passsing handleClick() would mean that I would run the result of the function 
         when I click it. It the function returns a callback, then that may be 
@@ -80,6 +83,7 @@ function App() {
         >
           Learn React
         </a>
+        <DisplayEthSupply handleSubmit={handleSubmit}/>
       </header>
     </div>
   );
